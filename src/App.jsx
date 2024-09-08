@@ -1,5 +1,6 @@
 import React from 'react'
 import { useState } from 'react';
+import SegmentPopup from './assets/components/SegmentPopup';
 const App = () => {
   const [popup, setPopup] = useState(false)
   const togglePopup = () => {
@@ -15,14 +16,7 @@ const App = () => {
 {/* 1. Conditionally render popup */}
 
 
-{popup && (
-        <div className="popup">
-          <div className="popup-content">
-            <button onClick={togglePopup}>Close</button>
-            <p>popup here</p>
-          </div>
-        </div>
-      )}
+{popup && <SegmentPopup closePopup={togglePopup}/>}
 
     </div>
   )
