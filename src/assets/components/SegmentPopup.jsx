@@ -1,9 +1,10 @@
 import { useState } from 'react';
-
+import axios from 'axios';
 function SegmentPopup({ closePopup }) {
   const [segmentName, setSegmentName] = useState('');
    const [selectedSchemas, setSelectedSchemas] = useState('[]');
    const [dropdowns, setDropdowns] = useState([]);
+   const [currentSchema, setCurrentSchema] = useState('');
 
      const handleSegmentName = (e) => {
     setSegmentName(e.target.value);
@@ -32,15 +33,47 @@ function SegmentPopup({ closePopup }) {
 
    // Add a new dropdown with default (empty) selected schema
   const addNewDropdown = () => {
-   
-    setDropdowns([...dropdowns, '']);
+    if (currentSchema && !selectedSchemas.includes(currentSchema)) {
+      // Add selected schema to the list of schemas
+      setDropdowns([...dropdowns, currentSchema]);
+      setSelectedSchemas([...selectedSchemas, currentSchema]);
+
+      // Reset current schema selection
+      setCurrentSchema('');
+    }
   };
 
+   // Filter out options that are already selected except for the one being modified
   const availableOptions = (selectedIndex) => {
-    // Filter out options that are already selected except for the one being modified
     return schema.filter(option => 
       !selectedSchemas.includes(option.value) || option.value === selectedSchemas[selectedIndex]
     );
+  };
+
+
+
+  // Prepare data in the required format
+  const handleSaveSegment = () => {
+    const schema1 = selectedSchemas.map(schemaValue => {
+      const schemaOption = schema.find(option => option.value === schemaValue);
+      return { [schemaValue]: schemaOption?.label };
+    });
+
+    const data = {
+      segment_name: segmentName,
+      schema: schema
+    };
+
+
+
+    // Send data (Webhook URL)
+    axios.post('https://webhook.site/c2bbde03-cd05-485d-9c21-e31d6636689a', data)
+      .then(response => {
+        console.log('Data sent successfully:', response.data);
+      })
+      .catch(error => {
+        console.error('Error sending data:', error);
+      });
   };
 
 
@@ -81,12 +114,24 @@ function SegmentPopup({ closePopup }) {
  ))}
         </div>
 
+
+            {/* Dropdown for adding a new schema */}
+            <p>Add schema to segment:</p>
+        <select value={currentSchema} onChange={(e) => setCurrentSchema(e.target.value)}>
+          <option value="" disabled>Select schema</option>
+          {schema.filter(option => !selectedSchemas.includes(option.value)).map(option => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+
         <p>Add schema to segment:</p>
     <button onClick={addNewDropdown}>
 
           + Add new schema
 </button>
-    
+<button onClick={handleSaveSegment}>Save Segment</button>
     
     
       </div>
