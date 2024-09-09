@@ -2,7 +2,8 @@ import { useState } from 'react';
 
 function SegmentPopup({ closePopup }) {
   const [segmentName, setSegmentName] = useState('');
-   const [selectedSchema, setSelectedSchema] = useState('');
+   const [selectedSchemas, setSelectedSchemas] = useState('[]');
+   const [dropdowns, setDropdowns] = useState([]);
 
      const handleSegmentName = (e) => {
     setSegmentName(e.target.value);
@@ -22,11 +23,25 @@ function SegmentPopup({ closePopup }) {
   ];
 
 
-  const handleSchemaChange = (e) => {
-    setSelectedSchema(e.target.value);
+  const handleSchemaChange = (index, value) => {
+    const newSelectedSchemas = [...selectedSchemas];
+    newSelectedSchemas[index] = value;
+    setSelectedSchemas(newSelectedSchemas);
   };
 
 
+   // Add a new dropdown with default (empty) selected schema
+  const addNewDropdown = () => {
+   
+    setDropdowns([...dropdowns, '']);
+  };
+
+  const availableOptions = (selectedIndex) => {
+    // Filter out options that are already selected except for the one being modified
+    return schema.filter(option => 
+      !selectedSchemas.includes(option.value) || option.value === selectedSchemas[selectedIndex]
+    );
+  };
 
 
 
@@ -46,23 +61,28 @@ function SegmentPopup({ closePopup }) {
         {/* <p>Segment Name: {segmentName}</p> */}
     
     
-    {/* {dropdown} */}
-    <p>Add schema to segment:</p>
+   {/* Dynamically added dropdowns */}
+   <div style={{ border: '1px solid blue', padding: '10px', marginTop: '10px' }}>
+          <p>Added Schemas:</p>
+          {dropdowns.map((dropdown, index) => (
+            <select 
+              key={index}
+              value={selectedSchemas[index] || ''} 
+              onChange={(e) => handleSchemaChange(index, e.target.value)}
+            >
+          <option value="" disabled>Select schema </option>
 
-    
-    <select value={selectedSchema} onChange={handleSchemaChange}>
-          <option value="" >Select schema </option>
-
-          {schema.map(option => (
-            <option key={option.value} >
+          {availableOptions(index).map(option => (
+            <option key={option.value} value={option.value} >
               {option.label}
             </option>
           ))}
         </select>
+ ))}
+        </div>
 
-
-
-    <button onClick={() => {  }}>
+        <p>Add schema to segment:</p>
+    <button onClick={addNewDropdown}>
 
           + Add new schema
 </button>
